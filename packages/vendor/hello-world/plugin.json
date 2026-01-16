@@ -1,0 +1,14 @@
+{
+    "name": "hello-world",
+    "title": "Hello World Plugin",
+    "namespace": "Vendor\\HelloWorld\\",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "Vendor\\HelloWorld\\": "src/"
+        }
+    },
+    "providers": [
+        "Vendor\\HelloWorld\\PluginServiceProvider"
+    ]
+}
