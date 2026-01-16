@@ -1,5 +1,5 @@
 
-# Theme System Documentation
+# Lara-Veil Themes: The Two Shall Become One
 
 ## Introduction
 

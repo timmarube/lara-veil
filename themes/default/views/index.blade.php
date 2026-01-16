@@ -1,6 +1,6 @@
 @extends('theme::layouts.app')
 
-@section('title', 'Developer Documentation - Larapack')
+@section('title', 'Developer Documentation - Lara-Veil')
 
 @section('content')
 <div class="docs-layout">
@@ -9,7 +9,7 @@
         <div class="sidebar-inner">
             <div class="logo">
                 <span class="logo-icon">📦</span>
-                <span class="logo-text">Larapack</span>
+                <span class="logo-text">Lara-Veil</span>
             </div>
             <nav class="sidebar-nav">
                 <div class="nav-section">
@@ -45,7 +45,7 @@
         <div class="content-inner">
             <section id="welcome">
                 <h1 class="page-title">Documentation</h1>
-                <p class="subtitle">Complete guide to building and extending the Larapack ecosystem.</p>
+                <p class="subtitle">Complete guide to building and extending the Lara-Veil ecosystem. "The Two Shall Become One"</p>
                 
                 <div class="status-banner">
                     <span class="status-indicator"></span>
@@ -56,7 +56,7 @@
 
             <section id="core-concepts">
                 <h2>Introduction</h2>
-                <p>Larapack is a WordPress-inspired extensibility architecture for Laravel. It allows developers to create self-contained modules called <strong>Plugins</strong> and visual skins called <strong>Themes</strong>.</p>
+                <p>Lara-Veil is a WordPress-inspired extensibility architecture for Laravel. It allows developers to create self-contained modules called <strong>Plugins</strong> and visual skins called <strong>Themes</strong>.</p>
                 
                 <div class="feature-grid">
                     <div class="feature">
@@ -158,7 +158,7 @@
             </section>
 
             <footer class="footer">
-                <p>© 2026 Larapack Framework. Designed for Advanced Extensibility.</p>
+                <p>© 2026 Lara-Veil Framework. "The Two Shall Become One"</p>
             </footer>
         </div>
     </main>

@@ -1,7 +1,8 @@
-# Larapack: WordPress-like Extensibility for Laravel
+# Lara-Veil: WordPress-like Extensibility for Laravel
 
 ## 1. Executive Summary
-Larapack is a framework extension for Laravel that implements a robust, hook-based plugin and theme system modeled after WordPress. It provides a structured way to extend core functionality, swap visual presentations, and maintain a decoupled architecture.
+Lara-Veil is a framework extension for Laravel that implements a robust, hook-based plugin and theme system modeled after WordPress. It provides a structured way to extend core functionality, swap visual presentations, and maintain a decoupled architecture.
+**Tagline:** "The Two Shall Become One"
 
 ## 2. Core Philosophy
 - **Non-Invasive**: Extend the application without modifying `/app`, `/config`, or `/routes` of the core Laravel installation.
@@ -42,7 +43,7 @@ To share this structure with an AI model, provide it with the three primary file
 graph LR
     subgraph Core
         Laravel[Laravel App]
-        System[Larapack Core]
+        System[Lara-Veil Core]
     end
     
     subgraph Extensions

@@ -1,4 +1,4 @@
-# Laravel Plugin & Theme System
+# Lara-Veil: The Two Shall Become One
 
 ## Overview
 A WordPress-like extensibility system for Laravel applications that allows dynamic loading of plugins and themes without modifying core code.

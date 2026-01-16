@@ -1,10 +1,12 @@
-# Larapack: WordPress-like Extensibility for Laravel
+# Lara-Veil: WordPress-like Extensibility for Laravel
 
 [![Laravel Version](https://img.shields.io/badge/Laravel-12.x-red.svg)](https://laravel.com)
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Larapack is a powerful framework extension that brings the flexibility of a **Plugin and Theme system** to Laravel. Inspired by WordPress, it allows you to build modular applications where third-party developers can extend functionality and swap designs without touching the core codebase.
+> "The Two Shall Become One"
+
+Lara-Veil is a powerful framework extension that brings the flexibility of a **Plugin and Theme system** to Laravel. Inspired by WordPress, it allows you to build modular applications where third-party developers can extend functionality and swap designs without touching the core codebase.
 
 ---
 
@@ -22,8 +24,8 @@ Larapack is a powerful framework extension that brings the flexibility of a **Pl
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/larapack.git
-   cd larapack
+   git clone https://github.com/your-username/lara-veil.git
+   cd lara-veil
    ```
 
 2. **Install dependencies:**
@@ -57,7 +59,7 @@ The project includes deep-dive documentation for every layer of the system:
 
 | Document | Purpose |
 | :--- | :--- |
-| [**Architecture Overview**](larapack_core.md) | High-level system design and integration map. |
+| [**Architecture Overview**](lara_veil_core.md) | High-level system design and integration map. |
 | [**Core System**](system.md) | Deep-dive into the Hook system, Managers, and Lifecycle. |
 | [**Plugin Development**](plugins.md) | Guide to building modular functionality in `/packages`. |
 | [**Theme Development**](themes.md) | Guide to building visual skins in `/themes`. |
@@ -99,13 +101,13 @@ themes/my-theme/
     └── index.blade.php
 ```
 
-Larapack will automatically prioritize views in your theme over the core application views.
+Lara-Veil will automatically prioritize views in your theme over the core application views.
 
 ---
 
 ## 🪝 Global Helpers
 
-Larapack provides WordPress-familiar functions out of the box:
+Lara-Veil provides WordPress-familiar functions out of the box:
 
 ```php
 // Register a logic hook
@@ -114,11 +116,11 @@ add_action('theme_loaded', function() {
 });
 
 // Modify data
-$title = apply_filters('site_title', 'Larapack');
+$title = apply_filters('site_title', 'Lara-Veil');
 ```
 
 ---
 
 ## 📜 License
 
-The Larapack framework is open-sourced software licensed under the [MIT license](LICENSE).
+The Lara-Veil framework is open-sourced software licensed under the [MIT license](LICENSE).

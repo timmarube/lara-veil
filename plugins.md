@@ -1,5 +1,5 @@
 
-# Plugin System Documentation
+# Lara-Veil Plugins: The Two Shall Become One
 
 ## Introduction
 
