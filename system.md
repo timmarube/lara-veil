@@ -22,49 +22,33 @@ app/Core/
 ```text
 laravel-app/
 ├── app/
-│   └── Core/           # System core files
-├── packages/           # User plugins directory
+│   ├── Core/           # System core files (HookSystem, Managers)
+│   └── Providers/
+│       └── ExtensibilityServiceProvider.php
+├── packages/           # User plugins directory (vendor-nested)
 ├── themes/             # User themes directory
 ├── bootstrap/
-│   └── plugins.php     # Plugin autoloader
-├── config/
-│   ├── plugins.php     # Plugin configuration
-│   └── themes.php      # Theme configuration
-└── storage/
-    ├── plugins/        # Plugin metadata & cache
-    └── themes/         # Theme metadata & cache
+│   └── providers.php   # Service provider list
+└── config/
 ```
 
 
 ## Installation & Setup
 
-### 1. Install Core Package
-```bash
-composer require your-org/laravel-extensibility
+### 1. Register Service Provider
+Add the provider to `bootstrap/providers.php`:
+```php
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\ExtensibilityServiceProvider::class,
+];
+```
 
-2. Publish Configuration
-bash
+### 2. Configure Plugin/Theme Directories
+Ensure `packages/` and `themes/` directories exist in your root.
 
-php artisan vendor:publish --tag=extensibility-config
+## System Flow
 
-3. Run Migrations
-bash
-
-php artisan migrate
-
-4. Add to Kernel
-php
-
-// bootstrap/app.php
-$app->singleton(
-    Illuminate\Contracts\Http\Kernel::class,
-    App\Http\Kernel::class
-);
-
-// Add plugin autoloader
-require __DIR__.'/../bootstrap/plugins.php';
-
-System Flow
 ### Application Bootstrap Sequence
 
 ```mermaid
@@ -93,8 +77,8 @@ graph TD
     H --> I[Response Sent]
 ```
 
-Hook System
-Available Hooks
+## Hook System
+
 ### Available Hooks
 
 #### System Hooks
@@ -118,16 +102,16 @@ Available Hooks
 - `view.rendering`: Before view is rendered
 - `view.rendered`: After view is rendered
 
-Hook Usage Examples
-php
-
-// Adding an action
-HookSystem::addAction('admin_menu', function($menu) {
-    $menu->add('Plugins', ['route' => 'admin.plugins']);
+#### Hook Usage Examples
+```php
+// Adding an action using global helper
+add_action('admin_menu', function($menu) {
+    // Logic
 });
 
-// Applying filters
-$content = HookSystem::applyFilters('the_content', $post->content);
+// Applying filters using global helper
+$content = apply_filters('the_content', $post->content);
+```
 
 Service Management
 Plugin Service Registration

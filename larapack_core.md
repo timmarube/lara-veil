@@ -18,11 +18,11 @@ The backbone handles the lifecycle:
 - **Database**: Standard tables for managing state (`plugins`, `themes`).
 
 ### B. The Plugin System (`plugins.md`)
-Plugins are self-contained packages located in `/packages`:
+Plugins are self-contained packages located in `/packages/[vendor]/[plugin]`:
 - **Manifest**: `plugin.json` defines metadata, namespace, and dependencies.
+- **Auto-Discovery**: The system core automatically scans for vendor subdirectories and loads valid plugins.
 - **Structure**: Mirrors Laravel's structure (src, routes, database, resources).
-- **Hooks**: Plugins use hooks to inject menus, widgets, or modify data flow.
-- **Lifecycle**: Support for `activate`, `deactivate`, and `uninstall` triggers.
+- **Hooks**: Plugins use global `add_action` and `add_filter` helpers to interact with the system.
 
 ### C. The Theme System (`themes.md`)
 Themes reside in `/themes` and control the UI:

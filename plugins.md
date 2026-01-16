@@ -10,31 +10,18 @@ Plugins extend Laravel applications with additional functionality without modify
 ### Basic Structure
 
 ```text
-my-plugin/
-├── plugin.json         # Plugin manifest
-├── composer.json       # Composer dependencies
-├── README.md           # Plugin documentation
-├── src/
-│   ├── Plugin.php      # Main plugin class
-│   ├── Providers/
-│   │   └── PluginServiceProvider.php
-│   ├── Controllers/
-│   ├── Models/
-│   ├── Services/
-│   └── Hooks/
-├── routes/
-│   ├── web.php
-│   └── api.php
-├── database/
-│   ├── migrations/
-│   └── seeders/
-├── resources/
-│   ├── views/
-│   ├── lang/
-│   └── assets/
-├── config/
-│   └── config.php
-└── tests/
+packages/
+└── vendor/
+    └── my-plugin/
+        ├── plugin.json         # Plugin manifest
+        ├── src/
+        │   └── PluginServiceProvider.php
+        ├── routes/
+        │   └── web.php
+        ├── database/
+        ├── resources/
+        │   └── views/
+        └── config/
 ```
 
 
@@ -93,70 +80,31 @@ packages/vendor/my-plugin/
 └── README.md
 ```
 
-2. Plugin Service Provider
-php
-
+### 2. Plugin Service Provider
+```php
 <?php
 
-namespace Vendor\MyPlugin\Providers;
+namespace Vendor\MyPlugin;
 
 use Illuminate\Support\ServiceProvider;
-use Vendor\MyPlugin\Plugin;
 
 class PluginServiceProvider extends ServiceProvider
 {
-    /**
-     * Register services.
-     */
-    public function register(): void
-    {
-        $this->mergeConfigFrom(
-            __DIR__.'/../../config/config.php', 'myplugin'
-        );
-        
-        $this->app->singleton('myplugin', function($app) {
-            return new Plugin();
-        });
-    }
-
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
         // Load routes
-        $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         
         // Load views
-        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'myplugin');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'myplugin');
         
-        // Load migrations
-        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
-        
-        // Load translations
-        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', 'myplugin');
-        
-        // Publish assets
-        $this->publishes([
-            __DIR__.'/../../resources/assets' => public_path('vendor/myplugin'),
-        ], 'myplugin-assets');
-        
-        // Register hooks
-        $this->registerHooks();
-    }
-    
-    /**
-     * Register plugin hooks.
-     */
-    protected function registerHooks(): void
-    {
-        $hooks = config('myplugin.hooks', []);
-        
-        foreach ($hooks as $hook => $handler) {
-            HookSystem::addAction($hook, $handler);
-        }
+        // Register hooks with global helpers
+        add_action('admin_menu', function() {
+            // Logic
+        });
     }
 }
+```
 
 ### 3. Main Plugin Class
 ```php
@@ -204,22 +152,13 @@ class Plugin
 #### Admin Hooks
 ```php
 // Add menu items
-HookSystem::addAction('admin_menu', function($menu) {
-    $menu->add('My Plugin', 'plugin.dashboard')
-         ->icon('plugin')
-         ->order(25);
+add_action('admin_menu', function($menu) {
+    // Logic to add menu
 });
 
 // Add dashboard widgets
-HookSystem::addAction('dashboard_widgets', function($widgets) {
-    $widgets->add(new MyPluginWidget());
-});
-
-// Add admin notices
-HookSystem::addAction('admin_notices', function() {
-    if ($someCondition) {
-        echo '<div class="notice notice-warning">Warning message</div>';
-    }
+add_action('dashboard_widgets', function($widgets) {
+    // Logic to add widgets
 });
 ```
 
@@ -258,21 +197,32 @@ HookSystem::addAction('profile_update', function($userId, $oldData) {
     $this->syncUserData($userId);
 }, 10, 2);
 ```
+#### Content Hooks
+```php
+// Filter post content
+add_filter('the_content', function($content) {
+    return $content;
+});
+
+// Modify post title
+add_filter('the_title', function($title) {
+    return strtoupper($title);
+});
+```
+
+#### User Hooks
+```php
+// User registration
+add_action('user_registered', function($userId) {
+    // Logic
+});
+```
 
 #### System Hooks
 ```php
 // Plugin activation
-HookSystem::addAction('plugin_activated', function($plugin) {
-    if ($plugin === 'my-plugin') {
-        $this->setupPlugin();
-    }
-});
-
-// Plugin deactivation
-HookSystem::addAction('plugin_deactivated', function($plugin) {
-    if ($plugin === 'my-plugin') {
-        $this->cleanup();
-    }
+add_action('plugin_activated', function($plugin) {
+    // Logic
 });
 ```
 
@@ -281,21 +231,15 @@ HookSystem::addAction('plugin_deactivated', function($plugin) {
 // Define a hook in your plugin
 class OrderProcessor
 {
-    public function process(Order $order)
+    public function process($order)
     {
-        // Allow other plugins to modify order before processing
-        $order = HookSystem::applyFilters('myplugin_order_before_process', $order);
+        // Allow other plugins to modify order
+        $order = apply_filters('order_before_process', $order);
         
-        // Process order
-        $result = $this->doProcess($order);
+        // Notify other plugins
+        do_action('order_processed', $order);
         
-        // Allow other plugins to modify result
-        $result = HookSystem::applyFilters('myplugin_order_after_process', $result);
-        
-        // Notify other plugins about processed order
-        HookSystem::doAction('myplugin_order_processed', $order, $result);
-        
-        return $result;
+        return $order;
     }
 }
 ```
@@ -304,90 +248,12 @@ class OrderProcessor
 
 ### Migrations
 ```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up()
-    {
-        Schema::create('myplugin_orders', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->decimal('amount', 10, 2);
-            $table->string('status')->default('pending');
-            $table->json('metadata')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
-    }
-    
-    public function down()
-    {
-        Schema::dropIfExists('myplugin_orders');
-    }
-};
-```
-
-### Models
-```php
-<?php
-
-namespace Vendor\MyPlugin\Models;
-
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-class Order extends Model
-{
-    use SoftDeletes;
-    
-    protected $table = 'myplugin_orders';
-    
-    protected $fillable = ['user_id', 'amount', 'status', 'metadata'];
-    
-    protected $casts = [
-        'metadata' => 'array',
-        'amount' => 'decimal:2',
-    ];
-}
-```
-
-## Configuration Management
-
-### Plugin Configuration
-```php
-// config/config.php
-return [
-    'enabled' => env('MYPLUGIN_ENABLED', true),
-    'api_key' => env('MYPLUGIN_API_KEY'),
-    'settings' => [
-        'option1' => 'default',
-        'option2' => 'default',
-    ],
-];
-```
-
-### Settings Page
-```php
-// resources/views/settings.blade.php
-@extends('myplugin::layouts.admin')
-
-@section('content')
-<div class="container">
-    <h1>{{ __('My Plugin Settings') }}</h1>
-    
-    <form method="POST" action="{{ route('myplugin.settings.update') }}">
-        @csrf
-        @method('PUT')
-        <input type="text" name="api_key" value="{{ $settings['api_key'] ?? '' }}">
-        <button type="submit">Save Settings</button>
-    </form>
-</div>
-@endsection
+Schema::create('myplugin_orders', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->decimal('amount', 10, 2);
+    $table->timestamps();
+});
 ```
 
 ## Asset Management
@@ -397,41 +263,10 @@ return [
 // In service provider
 public function boot()
 {
-    HookSystem::addAction('admin_enqueue_scripts', function() {
-        wp_enqueue_style('myplugin-admin', plugin_asset_url('css/admin.css'));
+    add_action('wp_enqueue_scripts', function() {
+        // Enqueue assets
     });
 }
-```
-
-### Asset Helper
-```php
-function plugin_asset_url($path)
-{
-    $base = plugins_url('my-plugin');
-    return rtrim($base, '/') . '/resources/assets/' . ltrim($path, '/');
-}
-```
-
-## Internationalization
-
-### Translation Files
-```text
-resources/lang/
-├── en/
-│   ├── messages.php
-├── es/
-│   ├── messages.php
-└── fr/
-    ├── messages.php
-```
-
-### Using Translations
-```php
-// In PHP
-echo __('myplugin::messages.welcome', ['name' => $user->name]);
-
-// In Blade
-{{ __('myplugin::messages.welcome', ['name' => $user->name]) }}
 ```
 
 ## Security Best Practices
@@ -440,7 +275,6 @@ echo __('myplugin::messages.welcome', ['name' => $user->name]);
 ```php
 $validated = $request->validate([
     'name' => 'required|string|max:255',
-    'email' => 'required|email',
 ]);
 ```
 
@@ -448,53 +282,6 @@ $validated = $request->validate([
 ```php
 if (!current_user_can('manage_options')) {
     abort(403);
-}
-```
-
-3. **Nonce Verification**
-```php
-if (!verify_nonce($request->nonce, 'myplugin_action')) {
-    abort(403);
-}
-```
-
-## Testing
-
-### Unit Tests
-```php
-public function test_order_creation()
-{
-    $order = $this->service->create([
-        'user_id' => 1,
-        'amount' => 100.00,
-    ]);
-    
-    $this->assertInstanceOf(Order::class, $order);
-}
-```
-
-### Integration Tests
-```php
-public function test_plugin_activates_successfully()
-{
-    $plugin = new MyPlugin();
-    $result = $plugin->activate();
-    $this->assertTrue($result);
-}
-```
-
-## Publishing a Plugin
-
-### 1. Register with Plugin Repository
-```json
-{
-    "name": "vendor/my-plugin",
-    "type": "laravel-plugin",
-    "extra": {
-        "laravel": {
-            "providers": ["Vendor\\MyPlugin\\Providers\\PluginServiceProvider"]
-        }
-    }
 }
 ```
 
