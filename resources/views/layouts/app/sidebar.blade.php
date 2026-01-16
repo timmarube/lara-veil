@@ -11,9 +11,18 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
+
                 <flux:sidebar.group :heading="__('Platform')" class="grid">
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+                <flux:sidebar.group :heading="__('Extensibility')" class="grid">
+                    <flux:sidebar.item icon="puzzle-piece" :href="route('admin.plugins')" :current="request()->routeIs('admin.plugins')" wire:navigate>
+                        {{ __('Plugins') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="swatch" :href="route('admin.themes')" :current="request()->routeIs('admin.themes')" wire:navigate>
+                        {{ __('Themes') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>

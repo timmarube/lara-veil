@@ -24,30 +24,77 @@ class PluginManager
             return;
         }
 
+        if (!\Illuminate\Support\Facades\Schema::hasTable('plugins')) {
+            return;
+        }
+
+        $activePlugins = \App\Models\Plugin::where('status', 'active')->pluck('name')->toArray();
+
         $vendors = File::directories($this->path);
 
         foreach ($vendors as $vendorDir) {
             $plugins = File::directories($vendorDir);
             foreach ($plugins as $pluginDir) {
-                $this->loadPluginFromDirectory($pluginDir);
+                $manifestPath = $pluginDir . DIRECTORY_SEPARATOR . 'plugin.json';
+                if (!File::exists($manifestPath)) continue;
+                
+                $manifest = json_decode(File::get($manifestPath), true);
+                $name = $manifest['name'] ?? basename($pluginDir);
+
+                if (in_array($name, $activePlugins)) {
+                    $this->loadPluginFromDirectory($pluginDir, $manifest);
+                }
             }
         }
+    }
+
+    /**
+     * Sync discovered plugins with the database.
+     */
+    public function syncPlugins()
+    {
+        if (!File::exists($this->path)) return [];
+
+        $discovered = [];
+        $vendors = File::directories($this->path);
+
+        foreach ($vendors as $vendorDir) {
+            $plugins = File::directories($vendorDir);
+            foreach ($plugins as $pluginDir) {
+                $manifestPath = $pluginDir . DIRECTORY_SEPARATOR . 'plugin.json';
+                if (!File::exists($manifestPath)) continue;
+
+                $manifest = json_decode(File::get($manifestPath), true);
+                if (!$manifest) continue;
+
+                $name = $manifest['name'] ?? basename($pluginDir);
+                $discovered[] = $name;
+
+                \App\Models\Plugin::updateOrCreate(
+                    ['name' => $name],
+                    [
+                        'namespace' => $manifest['namespace'] ?? '',
+                        'version' => $manifest['version'] ?? '1.0.0',
+                    ]
+                );
+            }
+        }
+        return $discovered;
     }
 
     /**
      * Load a plugin from a directory.
      *
      * @param string $directory
+     * @param array|null $manifest
      */
-    protected function loadPluginFromDirectory($directory)
+    protected function loadPluginFromDirectory($directory, $manifest = null)
     {
-        $manifestPath = $directory . DIRECTORY_SEPARATOR . 'plugin.json';
-
-        if (!File::exists($manifestPath)) {
-            return;
+        if (!$manifest) {
+            $manifestPath = $directory . DIRECTORY_SEPARATOR . 'plugin.json';
+            if (!File::exists($manifestPath)) return;
+            $manifest = json_decode(File::get($manifestPath), true);
         }
-
-        $manifest = json_decode(File::get($manifestPath), true);
 
         if (!$manifest) {
             Log::error("Invalid manifest for plugin in directory: {$directory}");
@@ -93,6 +140,42 @@ class PluginManager
             }
             return false;
         });
+    }
+
+    /**
+     * Activate a plugin.
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function activate($name)
+    {
+        $plugin = \App\Models\Plugin::where('name', $name)->first();
+        if (!$plugin) return false;
+
+        $plugin->status = 'active';
+        $plugin->save();
+
+        HookSystem::doAction('plugin_activated', $name);
+        return true;
+    }
+
+    /**
+     * Deactivate a plugin.
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function deactivate($name)
+    {
+        $plugin = \App\Models\Plugin::where('name', $name)->first();
+        if (!$plugin) return false;
+
+        $plugin->status = 'inactive';
+        $plugin->save();
+
+        HookSystem::doAction('plugin_deactivated', $name);
+        return true;
     }
 
     /**

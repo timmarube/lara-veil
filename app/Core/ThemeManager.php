@@ -24,13 +24,22 @@ class ThemeManager
     public function loadTheme($themeName = null)
     {
         if (!$themeName) {
-            $themeName = config('themes.active', env('THEME_DEFAULT', 'default'));
+            if (\Illuminate\Support\Facades\Schema::hasTable('themes')) {
+                $activeThemeModel = \App\Models\Theme::where('is_active', true)->first();
+                $themeName = $activeThemeModel ? $activeThemeModel->slug : env('THEME_DEFAULT', 'default');
+            } else {
+                $themeName = env('THEME_DEFAULT', 'default');
+            }
         }
 
         $themePath = $this->path . DIRECTORY_SEPARATOR . $themeName;
 
         if (!File::isDirectory($themePath)) {
             Log::warning("Theme not found: {$themeName}");
+            // Fallback to default if not found
+            if ($themeName !== 'default') {
+                $this->loadTheme('default');
+            }
             return;
         }
 
@@ -38,6 +47,8 @@ class ThemeManager
         if (File::exists($manifestPath)) {
             $manifest = json_decode(File::get($manifestPath), true);
             $this->activeTheme = $manifest;
+        } else {
+            $this->activeTheme = ['name' => ucfirst($themeName), 'slug' => $themeName];
         }
 
         // Add theme views to the view finder
@@ -57,6 +68,38 @@ class ThemeManager
         }
 
         HookSystem::doAction('theme_loaded', $themeName);
+    }
+
+    /**
+     * Sync discovered themes with the database.
+     */
+    public function syncThemes()
+    {
+        if (!File::exists($this->path)) return [];
+
+        $discovered = [];
+        $themes = File::directories($this->path);
+
+        foreach ($themes as $themeDir) {
+            $slug = basename($themeDir);
+            $manifestPath = $themeDir . DIRECTORY_SEPARATOR . 'theme.json';
+            
+            $name = ucfirst($slug);
+            if (File::exists($manifestPath)) {
+                $manifest = json_decode(File::get($manifestPath), true);
+                if ($manifest) {
+                    $name = $manifest['name'] ?? $name;
+                }
+            }
+
+            $discovered[] = $slug;
+
+            \App\Models\Theme::updateOrCreate(
+                ['slug' => $slug],
+                ['name' => $name]
+            );
+        }
+        return $discovered;
     }
 
     /**

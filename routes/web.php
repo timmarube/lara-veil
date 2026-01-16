@@ -11,3 +11,13 @@ Route::view('dashboard', 'dashboard')
     ->name('dashboard');
 
 require __DIR__.'/settings.php';
+
+use App\Http\Controllers\Admin\ExtensibilityController;
+
+Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+    Route::get('/plugins', [ExtensibilityController::class, 'plugins'])->name('admin.plugins');
+    Route::post('/plugins/{plugin}/toggle', [ExtensibilityController::class, 'togglePlugin'])->name('admin.plugins.toggle');
+    
+    Route::get('/themes', [ExtensibilityController::class, 'themes'])->name('admin.themes');
+    Route::post('/themes/{theme}/activate', [ExtensibilityController::class, 'activateTheme'])->name('admin.themes.activate');
+});
