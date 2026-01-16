@@ -24,7 +24,7 @@ Lara-Veil is a powerful framework extension that brings the flexibility of a **P
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/lara-veil.git
+   git clone https://github.com/timmarube/lara-veil.git
    cd lara-veil
    ```
 
