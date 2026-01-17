@@ -30,14 +30,14 @@ new class extends Component {
     </div>
 
     @if(session('success'))
-        <div class="bg-emerald-100 border border-emerald-400 text-emerald-700 px-4 py-3 rounded relative" role="alert">
+        <div class="bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-400 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline">{{ session('success') }}</span>
         </div>
     @endif
 
     <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         @foreach($themes as $theme)
-            <div class="bg-white dark:bg-neutral-800 rounded-3xl border {{ $theme->is_active ? 'border-indigo-500 ring-4 ring-indigo-500/10' : 'border-neutral-200 dark:border-neutral-700' }} overflow-hidden shadow-sm transition-all hover:translate-y-[-4px] hover:shadow-xl">
+            <div class="bg-white dark:bg-neutral-800 rounded-3xl border {{ $theme->is_active ? 'border-indigo-500 ring-4 ring-indigo-500/10 dark:ring-indigo-500/20' : 'border-neutral-200 dark:border-neutral-700' }} overflow-hidden shadow-sm transition-all hover:translate-y-[-4px] hover:shadow-xl">
                 <div class="aspect-[4/3] bg-neutral-100 dark:bg-neutral-900 relative group">
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
                          <span class="text-white font-bold text-lg">Preview Theme</span>

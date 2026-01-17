@@ -127,9 +127,9 @@ new class extends Component {
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     {{-- Preview Column --}}
     <div class="lg:col-span-2 space-y-6">
-        <div class="bg-white p-4 rounded-xl shadow-sm border">
+        <div class="bg-white dark:bg-zinc-800 p-4 rounded-xl shadow-sm border dark:border-zinc-700">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold">Image Preview</h2>
+                <h2 class="text-lg font-semibold dark:text-white">Image Preview</h2>
                 <flux:link :href="route('admin.media.index')" variant="ghost" icon="arrow-left" wire:navigate>Back to Library</flux:link>
             </div>
             
@@ -139,13 +139,13 @@ new class extends Component {
                 </div>
             @endif
 
-            <div class="relative bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center min-h-[400px] border border-dashed border-zinc-300">
+            <div class="relative bg-zinc-100 dark:bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center min-h-[400px] border border-dashed border-zinc-300 dark:border-zinc-700">
                 <img src="{{ $medium->url }}?t={{ time() }}" alt="{{ $medium->name }}" class="max-w-full max-h-[700px] object-contain shadow-2xl">
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 class="text-md font-medium mb-4">File Details</h3>
+        <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border dark:border-zinc-700">
+            <h3 class="text-md font-medium mb-4 dark:text-white">File Details</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                 <div>
                     <span class="text-zinc-500 block mb-1">Filename</span>
@@ -178,7 +178,7 @@ new class extends Component {
     <div class="space-y-6">
         <form wire:submit="save" class="space-y-6">
             {{-- Replace Image --}}
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
+            <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border dark:border-zinc-700">
                 <h3 class="font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-zinc-400">
                     <flux:icon icon="arrow-up-tray" variant="mini" />
                     Replace Image

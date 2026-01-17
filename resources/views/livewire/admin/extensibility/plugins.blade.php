@@ -34,7 +34,7 @@ new class extends Component {
     </div>
 
     @if(session('success'))
-        <div class="bg-emerald-100 border border-emerald-400 text-emerald-700 px-4 py-3 rounded relative" role="alert">
+        <div class="bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-400 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline">{{ session('success') }}</span>
         </div>
     @endif
@@ -48,7 +48,7 @@ new class extends Component {
                             <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100">{{ $plugin->name }}</h3>
                             <p class="text-xs text-neutral-500 font-mono">{{ $plugin->namespace }}</p>
                         </div>
-                        <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md {{ $plugin->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-neutral-100 text-neutral-600' }}">
+                        <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md {{ $plugin->status === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400' }}">
                             {{ $plugin->status }}
                         </span>
                     </div>

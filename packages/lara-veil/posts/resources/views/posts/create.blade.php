@@ -22,9 +22,12 @@
                         <option value="published">Published</option>
                     </select>
                 </div>
-                 <div>
-                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Featured Image</label>
-                    <input type="file" name="featured_image" class="w-full text-sm text-neutral-500 dark:text-neutral-400">
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Featured Image</label>
+                    <livewire:media.selector 
+                        name="featured_image_id" 
+                        id="featured_image_id" 
+                    />
                 </div>
             </div>
 

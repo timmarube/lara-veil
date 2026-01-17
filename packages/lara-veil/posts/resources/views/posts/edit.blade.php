@@ -23,14 +23,13 @@
                         <option value="published" {{ $post->status == 'published' ? 'selected' : '' }}>Published</option>
                     </select>
                 </div>
-                 <div>
-                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Featured Image</label>
-                    @if($post->featuredImage)
-                        <div class="mb-2">
-                             <img src="{{ $post->featuredImage->url }}" class="h-20 w-auto rounded border dark:border-neutral-600">
-                        </div>
-                    @endif
-                    <input type="file" name="featured_image" class="w-full text-sm text-neutral-500 dark:text-neutral-400">
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Featured Image</label>
+                    <livewire:media.selector 
+                        name="featured_image_id" 
+                        id="featured_image_id" 
+                        :value="$post->featured_image_id"
+                    />
                 </div>
             </div>
 

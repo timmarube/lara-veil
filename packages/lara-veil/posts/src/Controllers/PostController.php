@@ -28,32 +28,23 @@ class PostController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'status' => 'required|in:draft,published',
-            'featured_image' => 'nullable|image|max:2048',
+            'featured_image_id' => 'nullable|exists:media,id',
         ]);
 
         $slug = Str::slug($request->title);
-        // check slug even for soft deleted posts where slug like %slug%
         $count = Post::withTrashed()->where('slug', 'like', $slug . '%')->count();
         if ($count > 0) {
             $slug .= '-' . ($count + 1);
         }
 
-        $post = Post::create([
+        Post::create([
             'title' => $request->title,
             'slug' => $slug,
             'content' => $request->content,
             'status' => $request->status,
             'user_id' => auth()->id(),
+            'featured_image_id' => $request->featured_image_id,
         ]);
-
-        if ($request->hasFile('featured_image')) {
-            $media = $post->addMedia($request->file('featured_image'))
-                ->to('uploads/posts')
-                ->inCollection('featured_image')
-                ->save();
-                
-            $post->update(['featured_image_id' => $media->id]);
-        }
 
         return redirect()->route('admin.posts.index')->with('success', 'Post created successfully.');
     }
@@ -69,49 +60,13 @@ class PostController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'status' => 'required|in:draft,published',
-            'featured_image' => 'nullable|image|max:2048',
+            'featured_image_id' => 'nullable|exists:media,id',
         ]);
 
         $post->title = $request->title;
         $post->content = $request->content;
         $post->status = $request->status;
-
-        if ($request->hasFile('featured_image')) {
-            // Delete old media/file if replaced
-             if ($post->featured_image_id) {
-                 // Clean up old media record and file
-                 // Since we have HasMedia, we can just delete the media model directly if we loaded it, 
-                 // or use the relation. 
-                 $post->featuredImage?->delete();
-                 // Note: Media model delete() usually handles file deletion if using Spatie or similar, 
-                 // but here we just created a basic Media model.
-                 // Ideally MediaForgeService or Media model events should handle file deletion.
-                 // For now, let's assume MediaForge cleanup or manual cleanup is needed?
-                 // Wait, MediaForgeService::deleteOldFile logic existed but that was for atomic ops.
-                 // I will blindly overwrite for now or rely on SoftDeletes if Media has it?
-                 // Media model doesn't have SoftDeletes unless I added it? 
-                 // I should check Media migration? No soft deletes there.
-                 
-                 // If I want to delete the file, I should do:
-                 // Storage::disk($post->featuredImage->disk)->delete($post->featuredImage->path);
-                 // $post->featuredImage->delete();
-                 
-                 if ($oldMedia = $post->featuredImage) {
-                      Storage::disk($oldMedia->disk)->delete($oldMedia->path);
-                      $oldMedia->delete();
-                 }
-             }
-             
-             // Also clear collection as backup cleanup
-             $post->media()->where('collection_name', 'featured_image')->delete();
-
-            $media = $post->addMedia($request->file('featured_image'))
-                ->to('uploads/posts')
-                ->inCollection('featured_image')
-                ->save();
-
-            $post->featured_image_id = $media->id;
-        }
+        $post->featured_image_id = $request->featured_image_id;
 
         $post->save();
 
@@ -120,15 +75,10 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        if ($post->featured_image) {
-             Storage::disk('public')->delete($post->featured_image);
-        }
         $post->delete();
-
         return redirect()->route('admin.posts.index')->with('success', 'Post deleted successfully.');
     }
 
-    // Settings
     public function settings()
     {
         return view('posts::settings');
@@ -140,8 +90,13 @@ class PostController extends Controller
             'confirm' => 'required|accepted',
         ]);
 
-        Schema::dropIfExists('posts');
+        // Schema::dropIfExists('posts');
+        // remove migration
+        \Illuminate\Support\Facades\Artisan::call('migrate:rollback', [
+            '--path' => 'packages/lara-veil/posts/database/migrations',
+            '--force' => true,
+        ]);
 
-        return redirect()->route('admin.posts.settings')->with('success', 'Posts table removed successfully. The plugin will no longer function until you reinstall or run migrations.');
+        return redirect()->route('admin.posts.settings')->with('success', 'Posts table removed successfully.');
     }
 }
