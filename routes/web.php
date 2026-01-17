@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return view('theme::index');
@@ -12,12 +13,15 @@ Route::view('dashboard', 'dashboard')
 
 require __DIR__.'/settings.php';
 
-use App\Http\Controllers\Admin\ExtensibilityController;
+
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('/plugins', [ExtensibilityController::class, 'plugins'])->name('admin.plugins');
-    Route::post('/plugins/{plugin}/toggle', [ExtensibilityController::class, 'togglePlugin'])->name('admin.plugins.toggle');
-    
-    Route::get('/themes', [ExtensibilityController::class, 'themes'])->name('admin.themes');
-    Route::post('/themes/{theme}/activate', [ExtensibilityController::class, 'activateTheme'])->name('admin.themes.activate');
+    // Extensibility (Volt)
+    Volt::route('/plugins', 'admin.extensibility.plugins')->name('admin.plugins');
+    Volt::route('/themes', 'admin.extensibility.themes')->name('admin.themes');
+
+    // Media Manager (Volt)
+    Volt::route('/media', 'admin.media.index')->name('admin.media.index');
+    Volt::route('/media/create', 'admin.media.create')->name('admin.media.create');
+    Volt::route('/media/{medium}/edit', 'admin.media.edit')->name('admin.media.edit');
 });

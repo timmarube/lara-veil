@@ -16,6 +16,9 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="photo" :href="route('admin.media.index')" :current="request()->routeIs('admin.media.*')">
+                        {{ __('Media Library') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
                 <flux:sidebar.group :heading="__('Extensibility')" class="grid">
                     <flux:sidebar.item icon="puzzle-piece" :href="route('admin.plugins')" :current="request()->routeIs('admin.plugins')" wire:navigate>

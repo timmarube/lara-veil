@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class MediaForgeService
 {
     protected $files = [];
+    protected $localFiles = [];
     protected $urls = [];
     protected $uploadPath = null;
     protected $yearFolder = true;
@@ -457,6 +458,17 @@ class MediaForgeService
     }
 
     /**
+     * Alias for useYearFolder
+     * 
+     * @param bool $use
+     * @return self
+     */
+    public function yearFolder(bool $use = true): self
+    {
+        return $this->useYearFolder($use);
+    }
+
+    /**
      * Set whether to randomize file name
      *
      * @param bool $randomize
@@ -749,8 +761,8 @@ class MediaForgeService
      */
     public function run()
     {
-        if (empty($this->files) && empty($this->urls)) {
-            throw new \Exception('No files or URLs provided for upload');
+        if (empty($this->files) && empty($this->urls) && empty($this->localFiles)) {
+            throw new \Exception('No files, URLs, or local paths provided for processing');
         }
 
         $results = [];
@@ -765,7 +777,12 @@ class MediaForgeService
             $results[] = $this->processUrl($url);
         }
 
-        // Execute delete operations after successful uploads
+        // Process local files
+        foreach ($this->localFiles as $path) {
+            $results[] = $this->processLocalFile($path);
+        }
+
+        // Execute delete operations after successful processing
         $this->executeDeleteOperations();
 
         // Reset state for next operation
@@ -1177,7 +1194,7 @@ class MediaForgeService
      * @param string $relativePath
      * @return string
      */
-    protected function getFullPath(string $relativePath): string
+    public function getFullPath(string $relativePath): string
     {
         if ($this->privateUpload) {
             return storage_path("app/private/$relativePath");
@@ -1323,6 +1340,18 @@ class MediaForgeService
     }
 
     /**
+     * Set a local file path to process
+     *
+     * @param string $path
+     * @return self
+     */
+    public function loadFromPath(string $path): self
+    {
+        $this->localFiles[] = $path;
+        return $this;
+    }
+
+    /**
      * Process files and save to database
      * 
      * @return Media|array
@@ -1417,6 +1446,27 @@ class MediaForgeService
     }
 
     /**
+     * Process a local file already on disk
+     *
+     * @param string $path
+     * @return string
+     */
+    protected function processLocalFile(string $path): string
+    {
+        $fullPath = $this->getFullPath($path);
+
+        if (!File::exists($fullPath)) {
+            throw new \Exception("Local file not found: $fullPath");
+        }
+
+        if ($this->isImage($path)) {
+            return $this->applyImageOperations($fullPath);
+        }
+
+        return $path;
+    }
+
+    /**
      * Check if a file is an image
      *
      * @param string $fileName
@@ -1495,6 +1545,7 @@ class MediaForgeService
     protected function resetState(): void
     {
         $this->files = [];
+        $this->localFiles = [];
         $this->urls = [];
         $this->operations = [];
         $this->uploadPath = null;
@@ -1711,6 +1762,40 @@ class MediaForgeService
                         $this->makeAvatarImage($image, $filePath, $operation);
                         break;
 
+                    case 'rotate':
+                        $image->rotate($operation['angle'], $operation['bgcolor']);
+                        $lastOperationSaved = false;
+                        break;
+
+                    case 'flip':
+                        if ($operation['mode'] === 'v') {
+                            $image->flip();
+                        } else {
+                            $image->flop(); // flop() is horizontal flip in V3
+                        }
+                        $lastOperationSaved = false;
+                        break;
+
+                    case 'brightness':
+                        $image->brightness($operation['level']);
+                        $lastOperationSaved = false;
+                        break;
+
+                    case 'contrast':
+                        $image->contrast($operation['level']);
+                        $lastOperationSaved = false;
+                        break;
+
+                    case 'blur':
+                        $image->blur($operation['amount']);
+                        $lastOperationSaved = false;
+                        break;
+
+                    case 'greyscale':
+                        $image->greyscale();
+                        $lastOperationSaved = false;
+                        break;
+
                     case 'deleteOld':
                         $this->deleteFiles($operation['files']);
                         break;
@@ -1754,7 +1839,7 @@ class MediaForgeService
      * @param string $fullPath
      * @return string
      */
-    protected function getRelativePath(string $fullPath): string
+    public function getRelativePath(string $fullPath): string
     {
         if ($this->privateUpload) {
             // Remove storage_path("app/private/") prefix
@@ -1771,6 +1856,96 @@ class MediaForgeService
             }
             return $fullPath;
         }
+    }
+
+    /**
+     * Rotate the image
+     *
+     * @param float $angle
+     * @param string $bgcolor
+     * @return self
+     */
+    public function rotate(float $angle, string $bgcolor = '#ffffff'): self
+    {
+        $this->operations[] = [
+            'type' => 'rotate',
+            'angle' => $angle,
+            'bgcolor' => $bgcolor,
+        ];
+        return $this;
+    }
+
+    /**
+     * Flip the image
+     *
+     * @param string $mode 'h' for horizontal or 'v' for vertical
+     * @return self
+     */
+    public function flip(string $mode = 'h'): self
+    {
+        $this->operations[] = [
+            'type' => 'flip',
+            'mode' => $mode,
+        ];
+        return $this;
+    }
+
+    /**
+     * Adjust brightness
+     *
+     * @param int $level -100 to 100
+     * @return self
+     */
+    public function brightness(int $level): self
+    {
+        $this->operations[] = [
+            'type' => 'brightness',
+            'level' => $level,
+        ];
+        return $this;
+    }
+
+    /**
+     * Adjust contrast
+     *
+     * @param int $level -100 to 100
+     * @return self
+     */
+    public function contrast(int $level): self
+    {
+        $this->operations[] = [
+            'type' => 'contrast',
+            'level' => $level,
+        ];
+        return $this;
+    }
+
+    /**
+     * Apply blur
+     *
+     * @param int $amount 0 to 100
+     * @return self
+     */
+    public function blur(int $amount = 5): self
+    {
+        $this->operations[] = [
+            'type' => 'blur',
+            'amount' => $amount,
+        ];
+        return $this;
+    }
+
+    /**
+     * Turn image grayscale
+     *
+     * @return self
+     */
+    public function greyscale(): self
+    {
+        $this->operations[] = [
+            'type' => 'greyscale',
+        ];
+        return $this;
     }
 
     /**
