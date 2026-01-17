@@ -1180,7 +1180,7 @@ class MediaForgeService
     protected function getFullPath(string $relativePath): string
     {
         if ($this->privateUpload) {
-            return storage_path("app/public/$relativePath");
+            return storage_path("app/private/$relativePath");
         } else {
             return public_path($relativePath);
         }
@@ -1394,7 +1394,7 @@ class MediaForgeService
 
         // Create directory if it doesn't exist
         $fullPath = $this->privateUpload
-            ? storage_path("app/public/$uploadDir")
+            ? storage_path("app/private/$uploadDir")
             : public_path($uploadDir);
 
         if (!File::exists($fullPath)) {
@@ -1412,7 +1412,7 @@ class MediaForgeService
         }
 
         return $this->privateUpload
-            ? "storage/$uploadDir/$fileName"
+            ? "storage/private/$uploadDir/$fileName"
             : "$uploadDir/$fileName";
     }
 
@@ -1478,7 +1478,7 @@ class MediaForgeService
             if ($operation['type'] === 'deleteOld') {
                 foreach ($operation['files'] as $filePath) {
                     $fullPath = $this->privateUpload
-                        ? storage_path("app/public/$filePath")
+                        ? storage_path("app/private/$filePath")
                         : public_path($filePath);
 
                     if (File::exists($fullPath)) {
@@ -1568,7 +1568,7 @@ class MediaForgeService
 
         // Ensure unique filename
         $fullPath = $this->privateUpload
-            ? storage_path("app/public/$uploadDir")
+            ? storage_path("app/private/$uploadDir")
             : public_path($uploadDir);
 
         return $this->ensureUniqueFileName($fullPath, $name);
@@ -1757,10 +1757,10 @@ class MediaForgeService
     protected function getRelativePath(string $fullPath): string
     {
         if ($this->privateUpload) {
-            // Remove storage_path("app/public/") prefix
-            $storagePath = storage_path("app/public/");
+            // Remove storage_path("app/private/") prefix
+            $storagePath = storage_path("app/private/");
             if (str_starts_with($fullPath, $storagePath)) {
-                return "storage/" . substr($fullPath, strlen($storagePath));
+                return "storage/private/" . substr($fullPath, strlen($storagePath));
             }
             return $fullPath;
         } else {
