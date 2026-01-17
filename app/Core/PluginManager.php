@@ -24,11 +24,14 @@ class PluginManager
             return;
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasTable('plugins')) {
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasTable('plugins')) {
+                return;
+            }
+            $activePlugins = \App\Models\Plugin::where('status', 'active')->pluck('name')->toArray();
+        } catch (\Throwable $e) {
             return;
         }
-
-        $activePlugins = \App\Models\Plugin::where('status', 'active')->pluck('name')->toArray();
 
         $vendors = File::directories($this->path);
 
@@ -108,7 +111,7 @@ class PluginManager
         // Autoloading
         if (isset($manifest['autoload']['psr-4'])) {
             foreach ($manifest['autoload']['psr-4'] as $namespace => $path) {
-                $fullPath = $directory . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
+                $fullPath = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . trim($path, '/\\');
                 $this->registerAutoloader($namespace, $fullPath);
             }
         }

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 
 class MakePluginCommand extends Command
 {
-    protected $signature = 'make:plugin {name} {vendor=lara-veil}';
+    protected $signature = 'make:plugin {name} {vendor=LaraVeil}';
     protected $description = 'Create a new plugin';
 
     public function handle()
@@ -15,9 +15,10 @@ class MakePluginCommand extends Command
         $name = $this->argument('name');
         $vendor = $this->argument('vendor');
         $slug = \Illuminate\Support\Str::slug($name);
-        $namespace = ucfirst($vendor) . '\\' . \Illuminate\Support\Str::studly($name);
+        $vendorStudly = \Illuminate\Support\Str::studly($vendor);
+        $namespace = $vendorStudly . '\\' . \Illuminate\Support\Str::studly($name);
         
-        $path = base_path("packages/{$vendor}/{$slug}");
+        $path = base_path("packages/" . \Illuminate\Support\Str::slug($vendor) . "/{$slug}");
 
         if (File::exists($path)) {
             $this->error("Plugin already exists at {$path}");

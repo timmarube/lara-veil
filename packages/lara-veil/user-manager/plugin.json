@@ -1,0 +1,14 @@
+{
+    "name": "user-manager",
+    "title": "User Manager",
+    "namespace": "LaraVeil\\UserManager\\",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "LaraVeil\\UserManager\\": "src/"
+        }
+    },
+    "providers": [
+        "LaraVeil\\UserManager\\Providers\\PluginServiceProvider"
+    ]
+}

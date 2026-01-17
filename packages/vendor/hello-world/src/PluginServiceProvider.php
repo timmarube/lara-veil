@@ -10,7 +10,7 @@ class PluginServiceProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
-        add_action('admin_menu', function($menu) {
+        add_action('admin_menu', function() {
             echo "<!-- Hello World Menu Added -->";
         });
 

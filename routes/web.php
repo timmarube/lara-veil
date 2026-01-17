@@ -7,14 +7,14 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth'])
     ->name('dashboard');
 
 require __DIR__.'/settings.php';
 
 use App\Http\Controllers\Admin\ExtensibilityController;
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/plugins', [ExtensibilityController::class, 'plugins'])->name('admin.plugins');
     Route::post('/plugins/{plugin}/toggle', [ExtensibilityController::class, 'togglePlugin'])->name('admin.plugins.toggle');
     

@@ -1,0 +1,14 @@
+{
+    "name": "posts",
+    "title": "Posts",
+    "namespace": "LaraVeil\\Posts\\",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "LaraVeil\\Posts\\": "src/"
+        }
+    },
+    "providers": [
+        "LaraVeil\\Posts\\Providers\\PluginServiceProvider"
+    ]
+}

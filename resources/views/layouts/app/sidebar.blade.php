@@ -25,19 +25,15 @@
                         {{ __('Themes') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+
+                {{-- Plugin Menu Hook --}}
+                
+                <flux:sidebar.group :heading="__('Extensions')" class="grid">
+                    @php do_action('admin_menu'); @endphp
+                </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
